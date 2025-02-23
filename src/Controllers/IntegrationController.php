@@ -39,6 +39,12 @@ class IntegrationController extends Controller
                 ],
                 "settings" => [
                     [
+                        "label"=> "interval",
+                        "type"=> "text",
+                        "required"=> true,
+                        "default"=> "* * * * *"
+                    ],
+                    [
                         "label" => "API Key",
                         "type" => "text",
                         "required" => true,
@@ -190,7 +196,7 @@ class IntegrationController extends Controller
         );
         jsonResponse(['message' => 'An error occurred while processing your order'], 500);
     }
-    public function webhook(){
+    public function tick(){
         $data = get_data();
         logMessage(message: json_encode($data));
         exit();
