@@ -71,4 +71,55 @@ class Order extends Model
         $this->db->query("UPDATE orders SET created_at=DATE_SUB(CURDATE(), INTERVAL 1 DAY) WHERE order_id=:id")->bind(":id", $order_id)->execute();
         return $this->db->rowCount()  ?: null;
     }
+    public function reportTelex($api, $data)
+    {
+        $daily_orders = $this->getDailyOrderSummary();
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        $order_message = empty($daily_orders) ? "No order found for yesterder - {$yesterday}" : "The order summary for {$yesterday} is:\n" . formatOutput($daily_orders, [
+            'Order ID' => 'order_id',
+            'Transaction ID' => 'txn_id',
+            'Product ID' => 'product_id',
+            'Description' => 'description',
+            'Amount' => 'amount',
+            'Status' => 'status',
+            'Created At' => 'created_at'
+        ]);
+        $metrics = $this->getWebsiteMetrics($api);
+        return $order_message."\n".$metrics;
+    }
+    function getWebsiteMetrics($api_key)
+    {
+        $result = $this->db->query("SELECT 
+                            DATE(m.timestamp) AS date,
+                            COUNT(DISTINCT m.session_id) AS unique_visitors,
+                            COUNT(m.id) AS total_page_views,
+                            COUNT(DISTINCT m.referrer) AS unique_referrers,
+                            COUNT(DISTINCT m.browser) AS unique_browsers,
+                            COUNT(DISTINCT m.device) AS unique_devices,
+                            COUNT(DISTINCT m.os) AS unique_os,
+                            COUNT(DISTINCT m.screen_resolution) AS unique_resolutions
+                          FROM metrics m
+                          JOIN api_keys ak ON m.api_key_id = ak.id
+                          WHERE ak.api_key = :api_key
+                          GROUP BY DATE(m.timestamp)
+                          ORDER BY DATE(m.timestamp) DESC
+                          LIMIT 1")
+            ->bind(':api_key', $api_key)
+            ->single();
+
+        if (!$result) {
+            return "No metrics found for the given API key.";
+        }
+        $result = (array)$result;
+
+        return "📊 Website Metrics for {$result['date']}:
+    - Unique Visitors: {$result['unique_visitors']}
+    - Total Page Views: {$result['total_page_views']}
+    - Unique Referrers: {$result['unique_referrers']}
+    - Unique Browsers: {$result['unique_browsers']}
+    - Unique Devices: {$result['unique_devices']}
+    - Unique Operating Systems: {$result['unique_os']}
+    - Unique Screen Resolutions: {$result['unique_resolutions']}
+    ";
+    }
 }

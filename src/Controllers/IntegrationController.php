@@ -56,19 +56,6 @@ class IntegrationController extends Controller
                         "type" => "text",
                         "required" => true,
                         "default" => ""
-                    ],
-                    [
-                        "label" => "Order Events to Notify",
-                        "type" => "multi-checkbox",
-                        "required" => true,
-                        "default" => ["placed", "failed", "completed"],
-                        "options" => ["placed", "failed", "completed", "canceled", "deleted"]
-                    ],
-                    [
-                        "label" => "Metrics Report Time",
-                        "type" => "text",
-                        "required" => true,
-                        "default" => "00:00"
                     ]
                 ],
                 "tick_url" => DOMAIN."/integration/tick",
@@ -198,38 +185,74 @@ class IntegrationController extends Controller
         jsonResponse(['message' => 'An error occurred while processing your order'], 500);
     }
     public function tick() {
-        $data = get_data(); // This returns an object
-    
-        if (!isset($data->settings) || !is_array($data->settings)) {
-            logMessage("Settings not found in payload.");
-            exit();
+        if(!Helpers::isMethod("POST")){
+            jsonResponse([
+                'message' => 'Method not allowed',
+                'status' => 'success'
+            ]);
         }
-    
+        $rawData = file_get_contents("php://input");
+        $data = json_decode($rawData,true); // This returns an object
+        
         // Convert settings into an associative array (label => default)
-        $settings = [];
-        foreach ($data->settings as $setting) {
-            $settings[$setting->label] = $setting->default ?? null;
-        }
+        $settings = (array) array_column($data['settings'], 'default', 'label');
     
         // Extract API Key
-        $apiKey = $settings['API Key'] ?? null;
+        $apiKey = $data['settings']['API Key'] ?? null;
     
         if (!$apiKey) {
             logMessage("API Key not found in settings.");
             exit();
         }
 
-        $this->webhook_url = $settings['Notification Webhook URL'];
+        $this->webhook_url = $data['settings']['Notification Webhook URL'];
+        
+        // Pass settings and API key to the model's method
+        $report = $this->model->reportTelex($apiKey, $settings);
         emit_event(
-            event_name: "Ticking Interval",
-            message: "Telex called your tick url",
+            event_name: "Order Notification and Web Metrics",
+            message: $report,
             status: 'success',
-            username: 'ticker',
+            username: 'reporter',
             hook_url: $this->webhook_url
         );
-    
-        // Pass settings and API key to the model's method
-        $this->model->reportTelex($apiKey, $settings);
+        jsonResponse([
+            'message' => 'Tick received successfully',
+            'status' => 'success',
+            'report' => $report
+        ]);
+    }
+    public function webhook(){
+        jsonResponse([
+            'message' => 'Webhook received successfully',
+            'status' => 'success'
+        ]);
+    }
+    public function backDateOrder($params)
+    {
+        $order_id = @$params[0];
+        if (!isset($order_id)) {
+            jsonResponse([
+                'message' => "You must pass order ID to process Order",
+                'status' => 'error'
+            ], 422);
+        }
+        if ($this->model->backDateOrder($order_id)) {
+            emit_event(
+                event_name: "Backdate Order",
+                message: "An order has been backdated: order:{$order_id}",
+                status: 'success',
+                username: 'order-placer'
+            );
+            jsonResponse(['message' => 'Order processed successfully'], 201);
+        }
+        emit_event(
+            event_name: "Backdate Order",
+            message: "An error while trying to backdate an order for order_id: {$order_id}",
+            status: 'error',
+            username: 'order-placer'
+        );
+        jsonResponse(['message' => 'An error occurred while processing your order'], 500);
     }
     
 }
