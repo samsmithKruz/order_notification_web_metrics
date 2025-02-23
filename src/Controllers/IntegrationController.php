@@ -8,6 +8,7 @@ use App\Middleware\ApiMiddleware;
 class IntegrationController extends Controller
 {
     private $data;
+    private $webhook_url;
     public function __construct()
     {
         $this->data = [];
@@ -196,14 +197,39 @@ class IntegrationController extends Controller
         );
         jsonResponse(['message' => 'An error occurred while processing your order'], 500);
     }
-    public function tick(){
-        $data = get_data();
-        logMessage(message: json_encode($data));
-        exit();
-        // $event_name = $data?->event_name;
-        // $message = $data?->message;
-        // $status = $data?->status;
-        // $username = $data?->username;
-        // emit_event($event_name, $message, $status, $username);
+    public function tick() {
+        $data = get_data(); // This returns an object
+    
+        if (!isset($data->settings) || !is_array($data->settings)) {
+            logMessage("Settings not found in payload.");
+            exit();
+        }
+    
+        // Convert settings into an associative array (label => default)
+        $settings = [];
+        foreach ($data->settings as $setting) {
+            $settings[$setting->label] = $setting->default ?? null;
+        }
+    
+        // Extract API Key
+        $apiKey = $settings['API Key'] ?? null;
+    
+        if (!$apiKey) {
+            logMessage("API Key not found in settings.");
+            exit();
+        }
+
+        $this->webhook_url = $settings['Notification Webhook URL'];
+        emit_event(
+            event_name: "Ticking Interval",
+            message: "Telex called your tick url",
+            status: 'success',
+            username: 'ticker',
+            hook_url: $this->webhook_url
+        );
+    
+        // Pass settings and API key to the model's method
+        $this->model->reportTelex($apiKey, $settings);
     }
+    
 }
