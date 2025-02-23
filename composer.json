@@ -1,0 +1,40 @@
+{
+    "name": "smith_kruz/order_marketing_integration",
+    "version": "1.0.0",
+    "description": "A Telex integration for order notifications and website metrics. This integration sends real-time updates for order events (placed, failed, completed, canceled, deleted) and provides daily reports on website traffic metrics such as page views and unique visitors.",
+    "require": {
+        "vlucas/phpdotenv": "5.6.x-dev",
+        "guzzlehttp/guzzle": "8.0.x-dev",
+        "monolog/monolog": "3.x-dev",
+        "nesbot/carbon": "3.x-dev",
+        "fakerphp/faker": "2.0.x-dev"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/",
+            "Models\\": "src/Models"
+        },
+        "files": [
+            "src/Libraries/helper.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "Smith",
+            "email": "samspike46@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "scripts": {
+    "post-install-cmd": [
+        "@copy-env"
+    ],
+    "post-update-cmd": [
+        "@copy-env"
+    ],
+    "copy-env": [
+        "php -r \"if (!file_exists('.env')) { copy('.env.example', '.env'); echo '.env file created from .env.example' . PHP_EOL; }\""
+    ]
+}
+}

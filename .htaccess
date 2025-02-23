@@ -1,0 +1,13 @@
+# Enable URL rewriting
+RewriteEngine On
+
+# Restrict direct access to the vendor directory
+RewriteRule ^vendor/ - [F,L]
+
+# Restrict direct access to the src directory
+RewriteRule ^src/ - [F,L]
+
+# Redirect all requests to index.php (except for actual files and directories)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
