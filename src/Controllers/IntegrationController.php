@@ -64,7 +64,8 @@ class IntegrationController extends Controller
                         "default" => "00:00"
                     ]
                 ],
-                "tick_url" => DOMAIN."/integration/tick"
+                "tick_url" => DOMAIN."/integration/tick",
+                "target_url" => DOMAIN."/integration/webhook",
             ]
         ]);
     }
