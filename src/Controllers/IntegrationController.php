@@ -25,8 +25,8 @@ class IntegrationController extends Controller
                 "descriptions" => [
                     "app_name" => "Order and Metrics Notifier",
                     "app_description" => "Sends notifications for order events and daily website metrics.",
-                    "app_logo" => "https://".DOMAIN."/logo.png",
-                    "app_url" => "https://".DOMAIN,
+                    "app_logo" => DOMAIN."/logo.png",
+                    "app_url" => DOMAIN,
                     "background_color" => "#ffffff"
                 ],
                 "integration_category" => "E-commerce & Retail",
@@ -64,7 +64,7 @@ class IntegrationController extends Controller
                         "default" => "00:00"
                     ]
                 ],
-                "tick_url" => "https://".DOMAIN."/integration/tick"
+                "tick_url" => DOMAIN."/integration/tick"
             ]
         ]);
     }
