@@ -4,6 +4,11 @@ use App\Libraries\App;
 use App\Libraries\Helpers;
 use Dotenv\Dotenv;
 
+// Check if it is a cross-origin preflight request
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
 // Start the session
 session_start();
 // Load Composer's autoloader

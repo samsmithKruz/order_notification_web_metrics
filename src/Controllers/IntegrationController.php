@@ -12,7 +12,7 @@ class IntegrationController extends Controller
     public function __construct()
     {
         $this->data = [];
-        $this->addMiddleware([ApiMiddleware::class]);
+        // $this->addMiddleware([ApiMiddleware::class]);
         $this->model("Order");
     }
     public function index()
