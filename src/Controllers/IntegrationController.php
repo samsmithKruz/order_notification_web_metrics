@@ -26,7 +26,7 @@ class IntegrationController extends Controller
                 "descriptions" => [
                     "app_name" => "Order and Metrics Notifier",
                     "app_description" => "Sends notifications for order events and daily website metrics.",
-                    "app_logo" => DOMAIN."/logo.png",
+                    "app_logo" => DOMAIN."/public/logo.png",
                     "app_url" => DOMAIN,
                     "background_color" => "#ffffff"
                 ],
