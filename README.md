@@ -228,6 +228,13 @@ curl -X POST "https://space.otecfx.com/integration/placeOrder" \
 -d '{"txn_id":"123456","product_id":"001","description":"Sample product","amount":100.0,"user_id":10}'
 ```
 
+# Output Sample of Test
+
+<img width="1280" alt="Screenshot 2025-02-25 at 10 29 46" src="https://github.com/user-attachments/assets/341cbdd1-cb2d-4608-9026-cdb8a448891b" />
+<img width="1280" alt="Screenshot 2025-02-25 at 10 30 04" src="https://github.com/user-attachments/assets/abf60e4e-6f63-463d-91a4-14cbd878e250" />
+
+
+
 ## Conclusion
 
 Follow the above steps to ensure all endpoints work as expected. Verify success and error responses for a comprehensive test.
